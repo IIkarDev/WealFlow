@@ -1,0 +1,17 @@
+root = "." # The root directory of the project
+tmp_dir = "tmp" # The temporary directory where air will store its temporary files
+
+[build] # The build configuration
+bin = "main" # The name of the binary file to be generated after building the project
+cmd = "go build -o {{.Output}} {{.Input}}" # The command to build the project
+# delay = 1000 # Optional: Milliseconds to wait before restarting the process after a file change.
+exclude_dir = ["tmp"]  # Используйте exclude_dir для директорий
+include_ext = ["go"] # Используйте include_ext для расширений
+# ignore = [] # Можно оставить пустым, если exclude_dir и include_ext покрывают все
+# log_name = "air_errors.log" # Optional: Name of the error log file for air itself
+
+[log]
+time = true
+
+[misc]
+clean_on_exit = true

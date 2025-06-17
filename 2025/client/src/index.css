@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-gray-50 dark:bg-dark text-gray-900 dark:text-gray-100 antialiased;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-700 rounded-lg;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 dark:bg-gray-500 rounded-lg;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-400;
+}
+
+/* Input base styles (can be customized further or put in a global component style) */
+.input {
+    @apply appearance-none block w-full px-3 py-2 border rounded-md shadow-sm 
+           border-gray-300 dark:border-gray-600 
+           placeholder-gray-400 dark:placeholder-gray-500 
+           focus:outline-none focus:ring-primary-500 focus:border-primary-500 
+           dark:focus:ring-primary-400 dark:focus:border-primary-400
+           dark:bg-gray-700/50 dark:text-gray-100 
+           sm:text-sm transition-colors;
+}
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover, 
+.input:-webkit-autofill:focus, 
+.input:-webkit-autofill:active  {
+    -webkit-box-shadow: 0 0 0 30px theme('colors.gray.700') inset !important; /* For dark mode */
+    -webkit-text-fill-color: theme('colors.gray.100') !important; /* For dark mode */
+}
+html:not(.dark) .input:-webkit-autofill,
+html:not(.dark) .input:-webkit-autofill:hover, 
+html:not(.dark) .input:-webkit-autofill:focus, 
+html:not(.dark) .input:-webkit-autofill:active  {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: theme('colors.gray.900') !important;
+}
+
+
+.label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+}
+
+/* Card base styles (can be customized further) */
+.card {
+    @apply rounded-xl shadow-card overflow-hidden;
+}

@@ -1,0 +1,5 @@
+{
+  "name": "WealFlow - Personal Finance Manager",
+  "description": "A React application for managing personal finances, tracking income, expenses, and visualizing financial data. Powered by @tanstack/react-query and styled with Tailwind CSS.",
+  "requestFramePermissions": []
+}
