@@ -30,6 +30,9 @@ func CreateToken(c *fiber.Ctx, user models.User) error {
 		Value:    token,
 		Expires:  time.Now().Add(24 * time.Hour),
 		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "None",
+		Domain:   os.Getenv("JWT_DOMAIN"),
 	}
 	c.Cookie(&cookie)
 	return c.JSON(fiber.Map{"token": token})

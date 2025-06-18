@@ -109,9 +109,12 @@ func GetUser(c *fiber.Ctx) error {
 func Logout(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
 		Name:     "JWT_TOKEN",
-		Value:    "aas",
+		Value:    "",
 		Expires:  time.Now().Add(-time.Hour),
 		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "None",
+		Domain:   os.Getenv("JWT_DOMAIN"),
 	}
 
 	//c.ClearCookie("JWT_TOKEN")
