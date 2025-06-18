@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import type {Transaction} from '@/types';
-import Button from '@/components/common/Button';
+import type {Transaction} from '../../types';
+import Button from '../common/Button';
 import {Search, ChevronDown, ChevronUp, AlertCircle} from 'lucide-react';
 import TransactionItem from "./TransactionItem"; // Assuming TransactionItem is in the same folder
 

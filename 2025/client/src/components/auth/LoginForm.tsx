@@ -10,52 +10,7 @@ interface LoginFormProps {
     onToggleForm: () => void;
 }
 
-const fetchAndSendToken = async (getIdTokenClaims: () => Promise<any>) => {
-    try {
-        const claims = await getIdTokenClaims();
-        const idToken = claims?.__raw;
 
-
-        if (!idToken) return;
-
-        const res = await fetch("http://localhost:5000/auth/google", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: idToken }),
-        });
-
-        if (!res.ok) {
-            console.error("Failed to authenticate with backend");
-        }
-    } catch (err) {
-        console.error("Error sending token to backend:", err);
-    }
-};
-const LoginWithGoogle = () => {
-
-    const {loginWithRedirect, getIdTokenClaims} = useAuth0();
-
-    return (
-        <button
-            onClick={async () => {
-                await loginWithRedirect();
-                await fetchAndSendToken(getIdTokenClaims);
-            }}
-            className="
-            mt-4 w-full flex items-center justify-center gap-2 rounded-md
-            bg-blue-600
-            hover:bg-blue-700
-            focus:outline-none focus:ring-4
-            focus:ring-blue-300
-            text-white font-semibold py-3 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Sign in with Auth0" >
-
-            <LogIn size={20} />
-            Sign in with Google
-        </button>
-    );
-};
 
 
 const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
@@ -80,6 +35,53 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
         hidden: {opacity: 0, y: 20},
         visible: {opacity: 1, y: 0, transition: {duration: 0.4, ease: "easeOut" as const}},
         exit: {opacity: 0, y: -20, transition: {duration: 0.3, ease: "easeIn" as const}}
+    };
+
+    const fetchAndSendToken = async (getIdTokenClaims: () => Promise<any>) => {
+        try {
+            const claims = await getIdTokenClaims();
+            const idToken = claims?.__raw;
+
+
+            if (!idToken) return;
+
+            const res = await fetch("http://localhost:5000/auth/google", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: idToken }),
+            });
+
+            if (!res.ok) {
+                console.error("Failed to authenticate with backend");
+            }
+        } catch (err) {
+            console.error("Error sending token to backend:", err);
+        }
+    };
+    const LoginWithGoogle = () => {
+
+        const {loginWithRedirect, getIdTokenClaims} = useAuth0();
+
+        return (
+            <button
+                onClick={async () => {
+                    await loginWithRedirect();
+                    await fetchAndSendToken(getIdTokenClaims);
+                }}
+                className="
+            mt-4 w-full flex items-center justify-center gap-2 rounded-md
+            bg-blue-600
+            hover:bg-blue-700
+            focus:outline-none focus:ring-4
+            focus:ring-blue-300
+            text-white font-semibold py-3 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Sign in with Auth0" >
+
+                <LogIn size={20} />
+                Sign in with Google
+            </button>
+        );
     };
 
     return (

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Check, Loader2 } from 'lucide-react';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
+import Button from '../common/Button';
+import Input from '../common/Input';
 import type { Transaction, NewTransactionData } from '../../types';
 
 interface TransactionFormProps {

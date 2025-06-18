@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
  // Adjusted path if App.tsx is at root
 import { Edit, Trash2, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
-import {BASE_URL} from "@/App";
-import {useTransactionsManager} from "@/components/transactions/functions";
+import {useTransactionsManager} from "./functions";
 
 interface TransactionItemProps {
     transaction: Transaction;

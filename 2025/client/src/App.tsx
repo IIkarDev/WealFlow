@@ -1,4 +1,4 @@
-import {HashRouter as Router, Routes, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, useNavigate, Navigate} from 'react-router-dom';
 import React, {useState, useEffect} from 'react';
 import {AuthProvider} from './context/AuthContext';
 import {ThemeProvider} from './context/ThemeContext';
@@ -20,7 +20,7 @@ function App() {
         const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
         if (!hasVisitedBefore) {
             setShowWelcome(true);
-            // localStorage.setItem('hasVisitedBefore', 'true'); // Comment out to always show for demo
+            localStorage.setItem('hasVisitedBefore', 'true');
         }
     }, []);
 
@@ -36,8 +36,9 @@ function App() {
                     <Router>
                         <Routes>
                             <Route path="/auth" element={<AuthPage/>}/>
+                            <Route path="/" element={<Navigate to="/auth" replace />} />
                             <Route element={<MainLayout/>}>
-                                <Route path="/" element={
+                                <Route path="/home" element={
                                     <ProtectedRoute>
                                         <DashboardPage/>
                                         {showWelcome && <WelcomeOverlay onClose={() => setShowWelcome(false)}/>}

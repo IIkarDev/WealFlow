@@ -13,7 +13,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
         isAuthenticated: false,
-        isLoading: true, // true, пока сессия не проверена
+        isLoading: true,
     });
 
     // Центральная функция: получает данные пользователя, обновляет localStorage и состояние

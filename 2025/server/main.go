@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/IIkar/WealFlow/2025/controllers"
 	"github.com/IIkar/WealFlow/2025/database"
-	"github.com/IIkar/WealFlow/2025/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
@@ -61,7 +60,7 @@ func main() {
 	apiRoutes.Post("/transactions", controllers.PostTransaction)
 	apiRoutes.Patch("/transactions/:id", controllers.UpdateTransaction)
 	apiRoutes.Delete("/transactions/:id", controllers.DeleteTransaction)
-	apiRoutes.Delete("/clear", middleware.DeleteAllTransactionsOnUser)
+	apiRoutes.Delete("/clear", controllers.DeleteAllTransactionsOnUser)
 
 	if os.Getenv("ENV") == "production" {
 		app.Static("/", "../client") // Путь к собранным файлам React

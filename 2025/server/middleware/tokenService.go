@@ -1,13 +1,9 @@
 package middleware
 
 import (
-	"context"
-	"fmt"
-	"github.com/IIkar/WealFlow/2025/database"
 	"github.com/IIkar/WealFlow/2025/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"os"
@@ -32,7 +28,7 @@ func CreateToken(c *fiber.Ctx, user models.User) error {
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: "None",
-		Domain:   os.Getenv("JWT_DOMAIN"),
+		Domain:   os.Getenv("FRONTEND_ORIGIN"),
 	}
 	c.Cookie(&cookie)
 	return c.JSON(fiber.Map{"token": token})
@@ -57,17 +53,4 @@ func ExtractUserID(c *fiber.Ctx) (primitive.ObjectID, error) {
 		return primitive.NilObjectID, c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Ошибка получения ID из токена"})
 	}
 	return userID, nil
-}
-
-func DeleteAllTransactionsOnUser(c *fiber.Ctx) error {
-	userId, err := ExtractUserID(c)
-	if userId == primitive.NilObjectID || err != nil {
-		log.Fatal("No token or invalid id ")
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "No token or invalid id"})
-	}
-
-	res, err := database.TransactionsCollection.DeleteMany(context.Background(), bson.M{"user_id": userId})
-	fmt.Printf("Удалено: %d транзакций", res.DeletedCount)
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true, "deletedCount": res.DeletedCount})
 }

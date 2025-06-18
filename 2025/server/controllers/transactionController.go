@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"github.com/IIkar/WealFlow/2025/database"
 	"github.com/IIkar/WealFlow/2025/middleware"
 	"github.com/IIkar/WealFlow/2025/models"
@@ -220,4 +221,17 @@ func DeleteTransaction(c *fiber.Ctx) error {
 
 	// Возвращаем сообщение об успехе
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true, "message": "Транзакция успешно удалена"})
+}
+
+// DeleteAllTransactionsOnUser удаляет все транзакции по UserID (DevTool)
+func DeleteAllTransactionsOnUser(c *fiber.Ctx) error {
+	userId, err := middleware.ExtractUserID(c)
+	if userId == primitive.NilObjectID || err != nil {
+		log.Fatal("No token or invalid id ")
+	}
+
+	res, err := database.TransactionsCollection.DeleteMany(context.Background(), bson.M{"user_id": userId})
+	fmt.Printf("Удалено: %d транзакций", res.DeletedCount)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true, "deletedCount": res.DeletedCount})
 }

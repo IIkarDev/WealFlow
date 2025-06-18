@@ -37,7 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({className = ''}) => {
     }, [location.pathname]);
 
     const navItems = [
-        {path: '/', icon: <LayoutGrid size={28}/>, label: 'Dashboard'},
+        {path: '/home', icon: <LayoutGrid size={28}/>, label: 'Dashboard'},
         {path: '/transactions', icon: <DollarSign size={28}/>, label: 'Transactions'},
         {path: '/statistics', icon: <BarChart3 size={28}/>, label: 'Statistics'},
         {path: '/settings', icon: <Settings size={28}/>, label: 'Settings'}
