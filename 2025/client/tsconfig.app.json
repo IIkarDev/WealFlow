@@ -1,12 +1,29 @@
+//{
+//  "extends": "./tsconfig.json",
+//  "compilerOptions": {
+//    "composite": true,
+//    "noEmit": true,
+//    "jsx": "react-jsx",
+//    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+//    "moduleResolution": "bundler",
+//    "allowSyntheticDefaultImports": true
+//  },
+//  "include": ["src"]
+//}
+// tsconfig.app.json (настройки для React/Vite-приложения)
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "noEmit": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "strict": true,
+    "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "isolatedModules": true,
+    "noEmit": true,
+    "skipDefaultLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
