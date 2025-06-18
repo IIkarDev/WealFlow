@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import LoginForm from '@/components/auth/LoginForm';
-import RegisterForm from '@/components/auth/RegisterForm';
-import { useAuth } from '@/context/AuthContext';
+import LoginForm from '../components/auth/LoginForm';
+import RegisterForm from '../components/auth/RegisterForm';
+import { useAuth } from '../context/AuthContext';
 import { DollarSign } from 'lucide-react'; // Example icon
 
 const AuthPage: React.FC = () => {

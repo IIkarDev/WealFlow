@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { ThemeMode } from '@/types'; // Assuming types.ts is in src/types
+import type { ThemeMode } from '../types'; // Assuming types.ts is in src/types
 
 interface ThemeContextType {
   theme: ThemeMode;

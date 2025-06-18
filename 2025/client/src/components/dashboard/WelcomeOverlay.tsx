@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react'; // Added icons
-import Button from '@/components/common/Button';
+import Button from '../common/Button';
 
 interface WelcomeOverlayProps {
   onClose: () => void;

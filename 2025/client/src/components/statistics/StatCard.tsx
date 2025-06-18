@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import Card from '@/components/common/Card';
+import Card from '../common/Card';
 import { ArrowUp, ArrowDown } from 'lucide-react'; // For trend icons
 
 interface StatCardProps {

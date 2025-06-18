@@ -1,9 +1,9 @@
 import React, {useState, useMemo} from 'react';
 import {motion, Variants} from 'framer-motion';
-import Button from '@/components/common/Button';
-import StatCard from '@/components/statistics/StatCard';
-import ChartContainer from '@/components/statistics/ChartContainer';
-import type {ChartData, TimeFrame, Transaction} from '@/types';
+import Button from '../components/common/Button';
+import StatCard from '../components/statistics/StatCard';
+import ChartContainer from '../components/statistics/ChartContainer';
+import type {ChartData, TimeFrame, Transaction} from '../types';
 import {
     Wallet,
     TrendingUp,

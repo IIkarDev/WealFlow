@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Lock, Palette, Bell, CreditCard, ShieldCheck } from 'lucide-react'; // More diverse icons
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
-import Card from '@/components/common/Card';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
+import Button from '../components/common/Button';
+import Input from '../components/common/Input';
+import Card from '../components/common/Card';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type ActiveTab = 'profile' | 'password' | 'appearance' | 'notifications' | 'billing';
 

@@ -1,9 +1,8 @@
 import React from 'react';
 import {Outlet, Link} from 'react-router-dom';
-import Sidebar from '@/components/common/Sidebar';
+import Sidebar from '../components/common/Sidebar';
 import {Bell, ChevronDown} from 'lucide-react';
-import {useTheme} from '@/context/ThemeContext';
-import {useAuth} from '@/context/AuthContext';
+import {useAuth} from '../context/AuthContext';
 import {AnimatePresence, motion} from 'framer-motion';
 
 const MainLayout: React.FC = () => {

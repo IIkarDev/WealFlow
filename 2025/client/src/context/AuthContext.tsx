@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useState, useEffect, ReactNode, useCallback} from 'react';
-import type {User, AuthState} from '@/types';
+import type {User, AuthState} from '../types';
 
 interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<void>;

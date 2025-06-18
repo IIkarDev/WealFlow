@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
-import { useAuth } from '@/context/AuthContext';
+import Button from '../../components/common/Button';
+import Input from '../../components/common/Input';
+import { useAuth } from '../../context/AuthContext';
 
 interface RegisterFormProps {
   onToggleForm: () => void;

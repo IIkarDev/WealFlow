@@ -15,9 +15,9 @@ import {
   Cell,
   Sector
 } from 'recharts';
-import Card from '@/components/common/Card';
-import type { ChartData } from '../../types';
+import Card from '../common/Card';
 import { AlertTriangle } from 'lucide-react';
+import {ChartData} from "../../types";
 
 type ChartType = 'pie' | 'bar' | 'line';
 

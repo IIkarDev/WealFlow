@@ -1,12 +1,12 @@
 import React from 'react';
 import {motion, Variants} from 'framer-motion';
 import {Wallet, TrendingUp, TrendingDown, PiggyBank, PlusCircle, ListChecks} from 'lucide-react';
-import StatCard from '@/components/statistics/StatCard';
-import ChartContainer from '@/components/statistics/ChartContainer';
-import {TransactionTable} from '@/components/transactions/TransactionTable';
+import StatCard from '../components/statistics/StatCard';
+import ChartContainer from '../components/statistics/ChartContainer';
+import {TransactionTable} from '../components/transactions/TransactionTable';
 import type {ChartData, Transaction} from '../types';
 import {Link, useNavigate} from 'react-router-dom';
-import Button from '@/components/common/Button';
+import Button from '../components/common/Button';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 

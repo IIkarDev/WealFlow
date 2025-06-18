@@ -14,8 +14,8 @@ import {
     ChevronsLeft,
     ChevronsRight
 } from 'lucide-react';
-import {useAuth} from '@/context/AuthContext';
-import { useTheme } from '@/context/ThemeContext'; // For theme toggle in sidebar potentially
+import {useAuth} from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext'; // For theme toggle in sidebar potentially
 
 interface SidebarProps {
     className?: string;

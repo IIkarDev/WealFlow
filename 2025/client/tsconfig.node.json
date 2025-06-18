@@ -1,17 +1,3 @@
-//{
-//  "extends": "./tsconfig.json",
-//  "compilerOptions": {
-//    "composite": true,
-//    "skipLibCheck": true,
-//    "module": "ESNext",
-//    "moduleResolution": "bundler",
-//    "allowSyntheticDefaultImports": true,
-//    "strict": true,
-//    "noEmit": true
-//  },
-//  "include": ["vite.config.ts", "postcss.config.js", "tailwind.config.js"]
-//}
-// tsconfig.node.json (настройки для Vite/Node-кода)
 {
   "compilerOptions": {
     "target": "ESNext",
