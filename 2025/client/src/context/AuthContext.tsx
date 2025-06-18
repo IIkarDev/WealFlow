@@ -19,7 +19,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     // Центральная функция: получает данные пользователя, обновляет localStorage и состояние
     const validateUser = useCallback(async () => {
         try {
-            const response = await fetch("/auth", {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/auth", {
                 method: "GET",
                 credentials: 'include', // Критично для сессий на основе cookie
                 headers: {"Accept": "application/json"}
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const login = async (email: string, password: string) => {
         setAuthState(prev => ({...prev, isLoading: true, user: null, isAuthenticated: false }));
         try {
-            const response = await fetch("/auth/login", {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/auth/login", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include',
@@ -97,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const register = async (name: string, email: string, password: string) => {
         setAuthState(prev => ({...prev, isLoading: true, user: null, isAuthenticated: false }));
         try {
-            const response = await fetch("/auth/register", {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/auth/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include',
@@ -121,8 +121,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
         setAuthState({user: null, isAuthenticated: false, isLoading: false});
 
         try {
-            // Инвалидируем сессию на сервере
-            await fetch("/auth/logout", {
+            await fetch(import.meta.env.VITE_API_URL+"/auth/logout", {
                 method: "POST",
                 credentials: 'include',
             });

@@ -127,7 +127,7 @@
 //
 //
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Transaction, NewTransactionData } from '@/types';
+import type { Transaction, NewTransactionData } from '../../types';
 
 export const useTransactionsManager = () => {
     const queryClient = useQueryClient();
@@ -136,7 +136,7 @@ export const useTransactionsManager = () => {
     const transactionsQuery = useQuery<Transaction[], Error>({
         queryKey: ['transactions'],
         queryFn: async () => {
-            const res = await fetch('/api/transactions', { credentials: 'include' });
+            const res = await fetch(import.meta.env.VITE_API_URL+'/api/transactions', { credentials: 'include' });
             if (!res.ok) {
                 const error = await res.json().catch(() => ({ message: 'Ошибка загрузки' }));
                 throw new Error(error.message || 'Failed to fetch');
@@ -150,7 +150,7 @@ export const useTransactionsManager = () => {
     const createTransaction = useMutation({
         mutationFn: async (data: NewTransactionData): Promise<Transaction> => {
             const payload = { ...data, date: `${data.date}T00:00:00Z` };
-            const res = await fetch('/api/transactions', {
+            const res = await fetch(import.meta.env.VITE_API_URL+'/api/transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -177,7 +177,7 @@ export const useTransactionsManager = () => {
                 date: `${tx.date.slice(0, 10)}T00:00:00Z`,
                 type: tx.type,
             };
-            const res = await fetch(`/api/transactions/${tx.id}`, {
+            const res = await fetch(import.meta.env.VITE_API_URL+`/api/transactions/${tx.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -199,7 +199,7 @@ export const useTransactionsManager = () => {
     // Удаление
     const deleteTransaction = useMutation({
         mutationFn: async (id: string) => {
-            const res = await fetch(`/api/transactions/${id}`, {
+            const res = await fetch(import.meta.env.VITE_API_URL+`/api/transactions/${id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });

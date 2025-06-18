@@ -16,7 +16,7 @@ const DashboardPage: React.FC = () => {
     const {data: transactions, isLoading: isLoadingTransactions} = useQuery<Transaction[], Error>({
         queryKey: ["transactions"],
         queryFn: async () => {
-            const response = await fetch("/api/transactions", {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/api/transactions", {
                 credentials: 'include'// Критично для сессий на основе cookie
             });
             if (!response.ok) {
