@@ -41,9 +41,17 @@ const LoginWithGoogle = () => {
             onClick={async () => {
                 await loginWithRedirect();
                 await fetchAndSendToken(getIdTokenClaims);
-            }} // вызов внутри useEffect}
-            className="btn"
-        >
+            }}
+            className="
+            mt-4 w-full flex items-center justify-center gap-2 rounded-md
+            bg-blue-600
+            hover:bg-blue-700
+            focus:outline-none focus:ring-4
+            focus:ring-blue-300
+            text-white font-semibold py-3 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Sign in with Auth0" >
+
+            <LogIn size={20} />
             Sign in with Google
         </button>
     );
@@ -138,7 +146,7 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
                 <Button
                     type="submit"
                     variant="primary"
-                    className="w-full"
+                    className="w-full py-3 text-md"
                     isLoading={isLoading}
                     icon={isLoading ? undefined : <LogIn size={18}/>} // Show icon only when not loading
                     iconPosition="left"
@@ -151,7 +159,7 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
                 Don't have an account?{' '}
                 <button
                     onClick={onToggleForm}
-                    className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 focus:outline-none"
+                    className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 focus:outline-none"
                     disabled={isLoading}
                 >
                     Sign up

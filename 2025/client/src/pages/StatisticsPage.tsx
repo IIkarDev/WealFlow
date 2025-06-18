@@ -14,7 +14,6 @@ import {
     PieChartIcon
 } from 'lucide-react';
 import {format, endOfMonth, endOfYear, differenceInDays, subDays, startOfMonth, startOfYear} from 'date-fns';
-import {fetchTransactions} from "@/components/transactions/functions";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 
 const StatisticsPage: React.FC = () => {

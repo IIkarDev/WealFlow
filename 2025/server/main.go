@@ -63,9 +63,8 @@ func main() {
 	apiRoutes.Delete("/transactions/:id", controllers.DeleteTransaction)
 	apiRoutes.Delete("/clear", middleware.DeleteAllTransactionsOnUser)
 
-	// Если в продакшн и есть собранный фронтенд, отдаем статику
 	if os.Getenv("ENV") == "production" {
-		app.Static("/", "./client/dist") // Путь к собранным файлам React
+		app.Static("/", "../client") // Путь к собранным файлам React
 	}
 
 	// Порт из env или 5000 по умолчанию

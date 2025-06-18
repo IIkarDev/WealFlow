@@ -8,9 +8,7 @@ import type {ChartData, Transaction} from '../types';
 import {Link, useNavigate} from 'react-router-dom';
 import Button from '@/components/common/Button';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {BASE_URL} from "@/App";
-import TransactionsPage from "@/pages/TransactionsPage";
-import transactionsPage from "@/pages/TransactionsPage";
+
 
 const DashboardPage: React.FC = () => {
     const queryClient = useQueryClient();
@@ -54,12 +52,12 @@ const DashboardPage: React.FC = () => {
             color: ['#ff7d00', '#00b8a9', '#6b5ca5', '#f24c4c', '#5d62b5', '#ffc107', '#20c997'][index % 7],
         }))
         .sort((a, b) => b.value - a.value) // Sort for better pie chart visualization
-        .slice(0, 5); // Top 5 categories
+        .slice(0, 5);
 
     // Monthly Overview for Bar Chart (mocked for simplicity)
     const monthlyOverview: ChartData[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((month, index) => ({
         name: month,
-        value: Math.floor(Math.random() * 3000) + 1000, // Random value between 1000-4000
+        value: Math.floor(Math.random() * 3000) + 1000,
         color: '#ff7d00',
     }));
     monthlyOverview[3].value = totalIncome; // Make April's income reflect current mock data somewhat
