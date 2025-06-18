@@ -1,76 +1,81 @@
 package main
 
 import (
-	"context" // Для управления контекстом операций, например, с MongoDB
-	"fmt"     // Для форматированного вывода
+	"context"
+	"fmt"
 	"github.com/IIkar/WealFlow/2025/controllers"
 	"github.com/IIkar/WealFlow/2025/database"
-	"github.com/gofiber/fiber/v2"                 // Веб-фреймворк Fiber
-	"github.com/gofiber/fiber/v2/middleware/cors" // Middleware для CORS
-	"github.com/joho/godotenv"                    // Для загрузки переменных окружения из .env файла
-	"go.mongodb.org/mongo-driver/mongo"           // Драйвер MongoDB
-	"log"                                         // Для логирования ошибок
-	"os"                                          // Для работы с переменными окружения и файловой системой
+	"github.com/IIkar/WealFlow/2025/middleware"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
+	"os"
 )
 
 func main() {
-	fmt.Println("Приложение запущено.") // Информационное сообщение о старте
+	fmt.Println("Приложение запущено.")
 
-	// Загрузка переменных окружения из .env файла, если не в production среде
+	// Загружаем .env в dev
 	if os.Getenv("ENV") != "production" {
-		err := godotenv.Load(".env") // Используем godotenv для удобства разработки
-		if err != nil {
+		if err := godotenv.Load(".env"); err != nil {
 			log.Fatal("Ошибка загрузки .env файла: ", err)
 		}
 	}
 
 	client := database.MongoDBConnection()
-
-	// Отложенное отключение от MongoDB при завершении работы функции main
 	defer func(client *mongo.Client, ctx context.Context) {
 		err := client.Disconnect(ctx)
 		if err != nil {
-			log.Println("Ошибка при отключении от MongoDB:", err) // Не Fatal, т.к. приложение уже завершается
+			log.Println("Ошибка при отключении от MongoDB:", err)
 		}
 	}(client, context.Background())
 
 	app := fiber.New()
 
-	// Настройка CORS middleware для разрешения запросов с localhost:5173
+	// Берём фронтенд домен из env, если нет — fallback на localhost для разработки
+	frontendOrigin := os.Getenv("FRONTEND_ORIGIN")
+	if frontendOrigin == "" {
+		frontendOrigin = "http://localhost:5173"
+	}
+
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173", // URL клиентского приложения
+		AllowOrigins:     frontendOrigin,
 		AllowHeaders:     "Origin, Content-Type, Accept",
-		AllowMethods:     "GET,POST,PATCH,DELETE,OPTIONS", // Разрешенные HTTP методы
+		AllowMethods:     "GET,POST,PATCH,DELETE,OPTIONS",
 		AllowCredentials: true,
 	}))
 
-	// Аутентификационные маршруты (не требуют Authenticate middleware)
+	// Роуты аутентификации (без защиты)
 	authRoutes := app.Group("/auth")
-	authRoutes.Get("/user", controllers.GetUser) // GetUser уже проверяет токен
+	authRoutes.Get("/", controllers.GetUser)
+	authRoutes.Get("/google", controllers.OAuthCallback)
 	authRoutes.Post("/register", controllers.Register)
 	authRoutes.Post("/login", controllers.Login)
 	authRoutes.Post("/logout", controllers.Logout)
 
-	app.Get("/id", controllers.GetUserID)
-
-	// Маршруты API для транзакций, защищенные middleware
+	// Защищённые API маршруты
 	apiRoutes := app.Group("/api")
 	apiRoutes.Get("/transactions", controllers.GetTransactions)
 	apiRoutes.Post("/transactions", controllers.PostTransaction)
 	apiRoutes.Patch("/transactions/:id", controllers.UpdateTransaction)
 	apiRoutes.Delete("/transactions/:id", controllers.DeleteTransaction)
+	apiRoutes.Delete("/clear", middleware.DeleteAllTransactionsOnUser)
 
+	// Если в продакшн и есть собранный фронтенд, отдаем статику
 	if os.Getenv("ENV") == "production" {
-		app.Static("/", "./client/dist") // Путь к собранному клиентскому приложению
+		app.Static("/", "./client/dist") // Путь к собранным файлам React
 	}
 
-	// Определение порта для сервера
+	// Порт из env или 5000 по умолчанию
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
-		PORT = "5000" // Порт по умолчанию
+		PORT = "5000"
 	}
 
 	log.Println("Сервер запущен на порту " + PORT)
-	// Запуск HTTP сервера Fiber
-	log.Fatal(app.Listen("0.0.0.0:" + PORT)) // 0.0.0.0 для доступности извне контейнера/сети
+
+	// В продакшн запускаем на HTTP, SSL сделает платформа
+	log.Fatal(app.Listen("0.0.0.0:" + PORT))
 }

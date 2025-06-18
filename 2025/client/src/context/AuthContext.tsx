@@ -19,7 +19,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     // Центральная функция: получает данные пользователя, обновляет localStorage и состояние
     const validateUser = useCallback(async () => {
         try {
-            const response = await fetch("/auth/user", {
+            const response = await fetch("/auth", {
                 method: "GET",
                 credentials: 'include', // Критично для сессий на основе cookie
                 headers: {"Accept": "application/json"}

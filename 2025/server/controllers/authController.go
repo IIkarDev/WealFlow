@@ -2,15 +2,18 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"github.com/IIkar/WealFlow/2025/database"
 	"github.com/IIkar/WealFlow/2025/middleware"
 	"github.com/IIkar/WealFlow/2025/models"
+	"github.com/MicahParks/keyfunc"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"net/http"
+	"os"
 	"time"
 )
 
@@ -83,18 +86,6 @@ func Login(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	//log.Printf(">>> GetUser: ЗАПРОС К /auth/user. Cookie JWT_TOKEN: [%s]", c.Cookies("JWT_TOKEN"))
-	//cookie := c.Cookies("JWT_TOKEN")
-	//
-	//token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-	//	return []byte(os.Getenv("JWT_SECRET")), nil
-	//})
-	//if err != nil {
-	//	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "Действующий токен не найден"})
-	//}
-	//
-	//claims := token.Claims.(*jwt.StandardClaims)
-	//primitive.ObjectIDFromHex(claims.Issuer)
 	var user models.User
 
 	userID, err := middleware.ExtractUserID(c)
@@ -123,7 +114,6 @@ func Logout(c *fiber.Ctx) error {
 		HTTPOnly: true,
 	}
 
-	fmt.Println(c.Cookies("JWT_TOKEN"))
 	//c.ClearCookie("JWT_TOKEN")
 
 	c.Cookie(&cookie)
@@ -131,12 +121,57 @@ func Logout(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"success": true})
 }
 
-func GetUserID(c *fiber.Ctx) error {
-	userID, ok := c.Locals("user_id").(primitive.ObjectID)
-	fmt.Println(c.Locals("user_id"))
-	if !ok {
-		return c.SendStatus(fiber.StatusInternalServerError)
+func OAuthCallback(c *fiber.Ctx) error {
+	var body struct {
+		Token string `json:"token"`
+	}
+	if err := c.BodyParser(&body); err != nil || body.Token == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Token is required"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"user_id": userID})
+	// Загрузка JWKS из Auth0
+	jwksURL := "https://" + os.Getenv("AUTH0_DOMAIN") + "/.well-known/jwks.json"
+	jwks, err := keyfunc.Get(jwksURL, keyfunc.Options{})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to load JWKS"})
+	}
+
+	// Проверка и разбор id_token
+	token, err := jwt.Parse(body.Token, jwks.Keyfunc)
+	if err != nil || !token.Valid {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Invalid claims"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok || email == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Email not found in token"})
+	}
+
+	// Ищем или создаём пользователя
+	var user models.User
+	err = database.UsersCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		// Если пользователь не найден — создаём
+		user = models.User{
+			Email: email,
+			Name:  claims["name"].(string), // или "" если не хочешь
+		}
+		res, err := database.UsersCollection.InsertOne(context.Background(), user)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Ошибка создания пользователя"})
+		}
+		user.ID = res.InsertedID.(primitive.ObjectID)
+	}
+
+	// Создаём JWT и отправляем cookie
+	if err := middleware.CreateToken(c, user); err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{"success": true, "user": user})
 }

@@ -111,8 +111,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={90}
+                innerRadius={64}
+                outerRadius={96}
                 fill="#8884d8"
                 dataKey={dataKey}
                 onMouseEnter={onPieEnter}
@@ -126,7 +126,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 formatter={(value: number, name: string) => [`$${value.toFixed(2)}`, name]}
                 wrapperClassName="!bg-white dark:!bg-gray-700 !border-gray-300 dark:!border-gray-600 !shadow-lg !rounded-md"
                 contentStyle={{ backgroundColor: 'transparent', border: 'none'}}
-                labelStyle={{ color: '#333', fontWeight: 'bold' }} // Example: customizing label style
+                labelStyle={{ color: '#333', fontWeight: 'bold'}} // Example: customizing label style
                 itemStyle={{ color: '#555' }} // Example: customizing item style
               />
             </PieChart>
@@ -135,12 +135,12 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
       case 'bar':
         return (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data} margin={{ top: 5, right: 0, left: -25, bottom: 5 }} barCategoryGap="20%">
+            <BarChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 5 }} barCategoryGap="20%">
               <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-gray-200 dark:stroke-gray-700" />
               <XAxis dataKey={nameKey} tickLine={false} axisLine={false} className="text-xs text-gray-500 dark:text-gray-400" />
-              <YAxis tickLine={false} axisLine={false} className="text-xs text-gray-500 dark:text-gray-400" tickFormatter={(value) => `$${value / 1000}k`} />
+              <YAxis tickLine={false} axisLine={false} className="text-xs text-gray-500 dark:text-gray-400" tickFormatter={(value) => `${value / 1000}k`} />
               <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} wrapperClassName="!bg-white dark:!bg-gray-700 !border-gray-300 dark:!border-gray-600 !shadow-lg !rounded-md" />
-              <Legend iconSize={10} wrapperStyle={{fontSize: "12px", paddingTop: "10px"}}/>
+              <Legend iconSize={16} wrapperStyle={{fontSize: "12px", paddingTop: "8px"}}/>
               <Bar dataKey={dataKey} radius={[4, 4, 0, 0]}>
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color || '#cccccc'} />

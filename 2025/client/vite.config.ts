@@ -1,27 +1,37 @@
-import { defineConfig } from 'vite'
+import {ConfigEnv, defineConfig, loadEnv} from 'vite'
 import react from '@vitejs/plugin-react'
 // @ts-ignore
-import path from 'path' // нужно импортировать path
+import path from 'path'
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve('./src'), // Убедитесь, что путь правильный
+const env = loadEnv(process.cwd(), '');
+
+export default ({ mode }:ConfigEnv) => {
+
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return defineConfig({
+    plugins: [react()],
+    define: {
+      'process.env': env,
     },
-  },
-  server: {
-    port: 5173, // Порт вашего React-приложения
-    proxy: {
-      '/api': { // Проксируем все запросы, начинающиеся с /api
-        target: 'http://localhost:5000', // Адрес вашего Go бэкенда
-        changeOrigin: true,
+    resolve: {
+      alias: {
+        '@': path.resolve('./src'),
       },
-      '/auth': { // Также проксируем /auth для единообразия
-        target: 'http://localhost:5000',
-        changeOrigin: true,
+    },
+    server: {
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+        },
+        '/auth': {
+          target:  env.VITE_API_URL,
+          changeOrigin: true,
+        }
       }
     }
-  }
-})
+  })
+
+};
