@@ -13,7 +13,34 @@ import WelcomeOverlay from './components/dashboard/WelcomeOverlay';
 import {Auth0Provider} from "@auth0/auth0-react";
 import {useQueryClient} from "@tanstack/react-query";
 
+// type ErrorBoundaryProps = React.PropsWithChildren<{}>;
 
+// type ErrorBoundaryState = {
+//     hasError: boolean;
+//     error: Error | null;
+// };
+
+// class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+//     constructor(props: ErrorBoundaryProps) {
+//         super(props);
+//         this.state = { hasError: false, error: null };
+//     }
+//
+//     static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+//         return { hasError: true, error };
+//     }
+//
+//     componentDidCatch(error: Error, info: React.ErrorInfo) {
+//         console.error("ErrorBoundary caught:", error, info);
+//     }
+//
+//     render() {
+//         if (this.state.hasError) {
+//             return <div>Ошибка: {this.state.error?.message}</div>;
+//         }
+//         return this.props.children;
+//     }
+// }
 function App() {
     const [showWelcome, setShowWelcome] = useState(false);
 
@@ -26,6 +53,7 @@ function App() {
     }, []);
 
     return (
+        // <ErrorBoundary>
         <ThemeProvider>
             <AuthProvider>
                 <Auth0Provider domain={import.meta.env.VITE_AUTH0_DOMAIN}
@@ -66,6 +94,7 @@ function App() {
                 </Auth0Provider>
             </AuthProvider>
         </ThemeProvider>
+        // </ErrorBoundary>
     );
 }
 

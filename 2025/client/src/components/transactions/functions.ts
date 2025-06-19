@@ -164,8 +164,9 @@ export const useTransactionsManager = () => {
             return res.json();
         },
         onSuccess: (newTx) => {
-            queryClient.setQueryData<Transaction[]>(['transactions'], (old = []) => [newTx, ...old]);
+            queryClient.setQueryData<Transaction[]>(['transactions'], (old) => [newTx, ...(old ?? [])]);
         },
+        onError: (error) => {console.log(error)}
     });
 
     // Обновление

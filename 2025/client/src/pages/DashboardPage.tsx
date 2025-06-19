@@ -4,31 +4,33 @@ import {ListChecks, PiggyBank, PlusCircle, TrendingDown, TrendingUp, Wallet} fro
 import StatCard from '../components/statistics/StatCard';
 import ChartContainer from '../components/statistics/ChartContainer';
 import {TransactionTable} from '../components/transactions/TransactionTable';
-import type {ChartData} from '../types';
+import type {ChartData, Transaction} from '../types';
 import {Link, useNavigate} from 'react-router-dom';
 import Button from '../components/common/Button';
 import {useQueryClient} from "@tanstack/react-query";
 import {useGetTransactions} from "../components/transactions/functions";
 
 
-const DashboardPage: React.FC = () => {
+const DashboardPage: React.FC = () =>{
     const { data: transactions} = useGetTransactions()
+    const safeTransactions = transactions || [];
     const queryClient = useQueryClient()
     useEffect(() => {
         queryClient.invalidateQueries({queryKey: ["transactions"]}).then(r => {})
-    }, []);
+    });
 
     const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
-    const filteredTransactions = transactions.filter((transaction) => {
+
+    const filteredTransactions = safeTransactions.filter((transaction) => {
         return filterType === 'all' || (filterType === 'income' && transaction.type) || (filterType === 'expense' && !transaction.type);
     }).slice(0, 5);
 
-    const totalIncome = transactions.filter(t => t.type).reduce((sum, t) => sum + t.amount, 0);
-    const totalExpenses = transactions.filter(t => !t.type).reduce((sum, t) => sum + t.amount, 0);
+    const totalIncome = filteredTransactions.filter(t => t.type).reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = safeTransactions.filter(t => !t.type).reduce((sum, t) => sum + t.amount, 0);
     const totalBalance = totalIncome - totalExpenses;
 
     // Expenses by Category for Pie Chart
-    const expensesByCategoryMap = transactions
+    const expensesByCategoryMap = safeTransactions
         .filter(t => !t.type)
         .reduce((acc, t) => {
             acc[t.category] = (acc[t.category] || 0) + t.amount;

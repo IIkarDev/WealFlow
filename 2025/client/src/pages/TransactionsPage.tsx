@@ -13,7 +13,7 @@ const TransactionsPage: React.FC = () => {
     const queryClient = useQueryClient()
     useEffect(() => {
         queryClient.invalidateQueries({queryKey: ["transactions"]}).then(r => {})
-    }, []);
+    });
 
     const [showForm, setShowForm] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);

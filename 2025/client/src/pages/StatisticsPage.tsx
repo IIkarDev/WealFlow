@@ -22,7 +22,7 @@ const StatisticsPage: React.FC = () => {
     const queryClient = useQueryClient()
     useEffect(() => {
         queryClient.invalidateQueries({queryKey: ["transactions"]}).then(r => {})
-    }, []);
+    });
 
     const [timeframe, setTimeframe] = useState<TimeFrame>('month');
     const [customRange, setCustomRange] = useState<{ start: Date | null, end: Date | null }>({start: null, end: null});
