@@ -34,8 +34,8 @@ func main() {
 	app := fiber.New()
 
 	// Берём фронтенд домен из env, если нет — fallback на localhost для разработки
-	frontendOrigin := "https://" + os.Getenv("FRONTEND_ORIGIN")
-	if frontendOrigin == "https://" {
+	frontendOrigin := os.Getenv("FRONTEND_ORIGIN")
+	if frontendOrigin == "" {
 		frontendOrigin = "http://localhost:5173"
 	}
 

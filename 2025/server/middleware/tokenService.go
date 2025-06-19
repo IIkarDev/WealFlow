@@ -28,7 +28,7 @@ func CreateToken(c *fiber.Ctx, user models.User) error {
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: "None",
-		Domain:   os.Getenv("FRONTEND_ORIGIN"),
+		Domain:   os.Getenv("COOKIE_DOMAIN"),
 	}
 	c.Cookie(&cookie)
 	return c.JSON(fiber.Map{"token": token})
