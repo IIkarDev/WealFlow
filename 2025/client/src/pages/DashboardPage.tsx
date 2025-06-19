@@ -13,7 +13,7 @@ import {useTransactionsManager} from "../components/transactions/functions";
 const DashboardPage: React.FC = () => {
     const {data:  transactions} = useTransactionsManager();
 
-    const recentTransactions = transactions.slice(0, 5); // Show top 5 recent
+    const recentTransactions = (transactions !== null)? transactions.slice(0, 5) : transactions // Show top 5 recent
 
     const totalIncome = transactions.filter(t => t.type).reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => !t.type).reduce((sum, t) => sum + t.amount, 0);
