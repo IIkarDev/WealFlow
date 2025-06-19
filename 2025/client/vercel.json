@@ -1,8 +1,0 @@
-﻿{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    { "source": "/:path*", "destination": "https://wealflow-production.up.railway.app/:path*" },
-    { "source": "/((?!api/.*).*)", "destination": "/index.html" },
-    { "source": "/((?!auth/.*).*)", "destination": "/index.html" }
-  ]
-}
