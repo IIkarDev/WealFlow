@@ -70,7 +70,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({transactions,
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-card overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            {allowActions && <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="relative w-full sm:max-w-xs">
                         <input
@@ -106,7 +106,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({transactions,
                         </Button>
                     </div>
                 </div>
-            </div>
+            </div>}
 
             {isLoading ? (
                 <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">

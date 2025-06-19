@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/IIkar/WealFlow/2025/controllers"
+	"github.com/IIkar/WealFlow/2025/auth"
 	"github.com/IIkar/WealFlow/2025/database"
+	"github.com/IIkar/WealFlow/2025/middleware"
+	"github.com/IIkar/WealFlow/2025/transactions"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
@@ -47,20 +49,23 @@ func main() {
 	}))
 
 	// Роуты аутентификации (без защиты)
-	authRoutes := app.Group("/auth")
-	authRoutes.Get("/", controllers.GetUser)
-	authRoutes.Get("/google", controllers.OAuthCallback)
-	authRoutes.Post("/register", controllers.Register)
-	authRoutes.Post("/login", controllers.Login)
-	authRoutes.Post("/logout", controllers.Logout)
+	authRoutes := app.Group("/api/auth")
+	authRoutes.Get("/", auth.GetUser)
+	authRoutes.Get("/google", auth.OAuthCallback)
+	authRoutes.Post("/register", auth.Register)
+	authRoutes.Post("/login", auth.Login)
+	authRoutes.Post("/logout", auth.Logout)
+	authRoutes.Post("/refresh", middleware.Refresh)
 
 	// Защищённые API маршруты
-	apiRoutes := app.Group("/api")
-	apiRoutes.Get("/transactions", controllers.GetTransactions)
-	apiRoutes.Post("/transactions", controllers.PostTransaction)
-	apiRoutes.Patch("/transactions/:id", controllers.UpdateTransaction)
-	apiRoutes.Delete("/transactions/:id", controllers.DeleteTransaction)
-	apiRoutes.Delete("/clear", controllers.DeleteAllTransactionsOnUser)
+	apiRoutes := app.Group("/api", middleware.JWTMiddleware)
+	apiRoutes.Get("/transactions", transactions.GetTransactions)
+	apiRoutes.Post("/transactions", transactions.PostTransaction)
+	apiRoutes.Patch("/transactions/:id", transactions.UpdateTransaction)
+	apiRoutes.Delete("/transactions/:id", transactions.DeleteTransaction)
+
+	app.Get("/dev/access", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"token": c.Cookies("access_token")}) })
+	app.Get("/dev/refresh", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"token": c.Cookies("refresh_token")}) })
 
 	//if os.Getenv("ENV") == "production" {
 	//	app.Static("/", "../client") // Путь к собранным файлам React

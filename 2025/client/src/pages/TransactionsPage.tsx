@@ -5,20 +5,24 @@ import Button from '../components/common/Button';
 import {TransactionTable} from '../components/transactions/TransactionTable';
 import TransactionForm from '../components/transactions/TransactionForm';
 import type {Transaction, NewTransactionData} from '../types';
-import {useTransactionsManager} from "../components/transactions/functions";
+import {useGetTransactions, useTransactionsManager} from "../components/transactions/functions";
+import {useQueryClient} from "@tanstack/react-query";
 
 const TransactionsPage: React.FC = () => {
+    const { data: transactions, isLoading} = useGetTransactions();
+    const queryClient = useQueryClient()
+    useEffect(() => {
+        queryClient.invalidateQueries({queryKey: ["transactions"]}).then(r => {})
+    }, []);
+
     const [showForm, setShowForm] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
     const {
-        data: transactions,
-        isLoading,
-        isPending,
         createTransaction,
         updateTransaction,
+        deleteTransaction
     } = useTransactionsManager();
-
 
     const handleFormSubmit = (transactionData: NewTransactionData) => {
         if (editingTransaction) {
@@ -59,9 +63,9 @@ const TransactionsPage: React.FC = () => {
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Transactions</h1>
                 <Button
                     variant="primary"
-                    icon={isPending ? <Loader2 size={18} className="animate-spin"/> : <Plus size={18}/>}
+                    icon={isLoading ? <Loader2 size={18} className="animate-spin"/> : <Plus size={18}/>}
                     onClick={handleOpenAddForm}
-                    disabled={isPending || isLoading} // Also disable if transactions are loading initially
+                    disabled={isLoading} // Also disable if transactions are loading initially
                 >
                     Add Transaction
                 </Button>
@@ -82,7 +86,7 @@ const TransactionsPage: React.FC = () => {
                             onCancel={handleCancelForm}
                             initialData={editingTransaction || undefined} // Date here is passed as is
                             isEditing={!!editingTransaction}
-                            isSubmitting={isPending}
+                            isSubmitting={isLoading}
                         />
                     </motion.div>
                 )}

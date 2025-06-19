@@ -129,14 +129,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Transaction, NewTransactionData } from '../../types';
 
-export const useTransactionsManager = () => {
-    const queryClient = useQueryClient();
-
-    // Получение
-    const transactionsQuery = useQuery<Transaction[], Error>({
+export const useGetTransactions = () => {
+    return useQuery<Transaction[], Error>({
         queryKey: ['transactions'],
         queryFn: async () => {
-            const res = await fetch(import.meta.env.VITE_API_URL+'/api/transactions', { credentials: 'include' });
+            const res = await fetch(import.meta.env.VITE_API_URL + '/api/transactions', { credentials: 'include' });
             if (!res.ok) {
                 const error = await res.json().catch(() => ({ message: 'Ошибка загрузки' }));
                 throw new Error(error.message || 'Failed to fetch');
@@ -145,8 +142,12 @@ export const useTransactionsManager = () => {
         },
         initialData: [],
     });
+};
 
-    // Создание
+
+export const useTransactionsManager = () => {
+    const queryClient = useQueryClient();
+
     const createTransaction = useMutation({
         mutationFn: async (data: NewTransactionData): Promise<Transaction> => {
             const payload = { ...data, date: `${data.date}T00:00:00Z` };
@@ -216,7 +217,6 @@ export const useTransactionsManager = () => {
     });
 
     return {
-        ...transactionsQuery,
         createTransaction,
         updateTransaction,
         deleteTransaction,

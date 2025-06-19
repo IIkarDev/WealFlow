@@ -45,7 +45,7 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
 
             if (!idToken) return;
 
-            const res = await fetch("/auth/google", {
+            const res = await fetch("/api/auth/google", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

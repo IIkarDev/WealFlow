@@ -11,6 +11,7 @@ import StatisticsPage from './pages/StatisticsPage';
 import SettingsPage from './pages/SettingsPage';
 import WelcomeOverlay from './components/dashboard/WelcomeOverlay';
 import {Auth0Provider} from "@auth0/auth0-react";
+import {useQueryClient} from "@tanstack/react-query";
 
 
 function App() {

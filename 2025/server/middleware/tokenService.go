@@ -1,57 +1,60 @@
 package middleware
 
 import (
-	"github.com/IIkar/WealFlow/2025/models"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
-func CreateToken(c *fiber.Ctx, user models.User) error {
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    user.ID.Hex(),
-		ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
-	})
-	token, err := claims.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		c.Status(fiber.StatusInternalServerError)
-		return c.JSON(fiber.Map{"error": "не удается войти в систему"})
+func CreateToken(userID primitive.ObjectID, secret string) (string, error) {
+	var duration int
+	if secret == os.Getenv("ACCESS_SECRET") {
+		duration, _ = strconv.Atoi(os.Getenv("ACCESS_EXPIRE_MINUTES"))
+	} else {
+		duration, _ = strconv.Atoi(os.Getenv("REFRESH_EXPIRE_HOURS"))
+		duration *= 60
 	}
-
-	cookie := fiber.Cookie{
-		Name:     "JWT_TOKEN",
-		Value:    token,
-		Expires:  time.Now().Add(24 * time.Hour),
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Domain:   os.Getenv("COOKIE_DOMAIN"),
-		Path:     "/",
+	claims := jwt.MapClaims{
+		"sub": userID.Hex(),
+		"exp": time.Now().Add(time.Minute * time.Duration(duration)).Unix(),
 	}
-	c.Cookie(&cookie)
-	return c.JSON(fiber.Map{"token": token})
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
 }
 
-func ExtractUserID(c *fiber.Ctx) (primitive.ObjectID, error) {
-	cookie := c.Cookies("JWT_TOKEN")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
+func SetAuthCookies(c *fiber.Ctx, key string, token string) {
+	isSecure := false
+	sameSite := "Lax"
+	if os.Getenv("ENV") == "production" {
+		isSecure = true
+		sameSite = "None"
+	}
+	c.Cookie(&fiber.Cookie{
+		Name:     key,
+		Value:    token,
+		HTTPOnly: true,
+		Secure:   isSecure,
+		SameSite: sameSite,
+		Domain:   os.Getenv("COOKIE_DOMAIN"),
+		Path:     "/",
 	})
-	if err != nil {
-		return primitive.NilObjectID, c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "Действующий токен не найден"})
+}
+
+func ValidateToken(tokenStr string, secret string) (string, error) {
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil || !token.Valid {
+		return "", errors.New("Пользователь не авторизован или недопустимый токен")
 	}
-
-	claims := token.Claims.(*jwt.StandardClaims)
-
-	userID, err := primitive.ObjectIDFromHex(claims.Issuer)
-
-	if err != nil {
-		log.Printf("Ошибка получения ID из токена: %v\n", err)
-		return primitive.NilObjectID, c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Ошибка получения ID из токена"})
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		return "", errors.New("Недопустимый токен")
 	}
-	return userID, nil
+	return sub, nil
 }

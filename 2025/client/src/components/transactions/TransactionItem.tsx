@@ -13,8 +13,8 @@ interface TransactionItemProps {
 }
 
 const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onEdit, allowActions }) => {
-    const { deleteTransaction, isPending } = useTransactionsManager();
-
+    const { deleteTransaction, createTransaction, updateTransaction } = useTransactionsManager();
+    const isPending = false
     const handleDelete = () => {
         if (window.confirm("Are you sure you want to delete this transaction?")) {
             deleteTransaction.mutate(transaction.id);

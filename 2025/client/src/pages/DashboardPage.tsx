@@ -1,19 +1,27 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {motion, Variants} from 'framer-motion';
-import {Wallet, TrendingUp, TrendingDown, PiggyBank, PlusCircle, ListChecks} from 'lucide-react';
+import {ListChecks, PiggyBank, PlusCircle, TrendingDown, TrendingUp, Wallet} from 'lucide-react';
 import StatCard from '../components/statistics/StatCard';
 import ChartContainer from '../components/statistics/ChartContainer';
 import {TransactionTable} from '../components/transactions/TransactionTable';
-import type {ChartData, Transaction} from '../types';
+import type {ChartData} from '../types';
 import {Link, useNavigate} from 'react-router-dom';
 import Button from '../components/common/Button';
-import {useTransactionsManager} from "../components/transactions/functions";
+import {useQueryClient} from "@tanstack/react-query";
+import {useGetTransactions} from "../components/transactions/functions";
 
 
 const DashboardPage: React.FC = () => {
-    const {data:  transactions} = useTransactionsManager();
+    const { data: transactions} = useGetTransactions()
+    const queryClient = useQueryClient()
+    useEffect(() => {
+        queryClient.invalidateQueries({queryKey: ["transactions"]}).then(r => {})
+    }, []);
 
-    const recentTransactions = (transactions !== null)? transactions.slice(0, 5) : transactions // Show top 5 recent
+    const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+    const filteredTransactions = transactions.filter((transaction) => {
+        return filterType === 'all' || (filterType === 'income' && transaction.type) || (filterType === 'expense' && !transaction.type);
+    }).slice(0, 5);
 
     const totalIncome = transactions.filter(t => t.type).reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => !t.type).reduce((sum, t) => sum + t.amount, 0);
@@ -137,13 +145,38 @@ const DashboardPage: React.FC = () => {
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                         Recent Transactions
                     </h2>
+                        <div className="flex">
+                            <div className="space-x-2">
+                                <Button
+                                    variant={filterType === 'all' ? 'primary' : 'outline'}
+                                    size="md"
+                                    onClick={() => setFilterType('all')}
+                                >
+                                    All
+                                </Button>
+                                <Button
+                                    variant={filterType === 'income' ? 'primary' : 'outline'}
+                                    size="md"
+                                    onClick={() => setFilterType('income')}
+                                >
+                                    Income
+                                </Button>
+                                <Button
+                                    variant={filterType === 'expense' ? 'primary' : 'outline'}
+                                    size="md"
+                                    onClick={() => setFilterType('expense')}
+                                >
+                                    Expense
+                                </Button>
+                            </div>
                     <Link to="/transactions"
-                          className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium flex items-center">
+                          className="ml-8 text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium flex items-center">
                         View All <ListChecks size={16} className="ml-1"/>
                     </Link>
+                        </div>
                 </div>
                 <TransactionTable
-                    transactions={recentTransactions}
+                    transactions={filteredTransactions}
                     onEditTransaction={() => {
                         navigate('/transactions', {state: {edit: true}});
                     }}

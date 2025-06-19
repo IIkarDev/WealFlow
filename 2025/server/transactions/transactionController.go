@@ -1,10 +1,8 @@
-package controllers
+package transactions
 
 import (
 	"context"
-	"fmt"
 	"github.com/IIkar/WealFlow/2025/database"
-	"github.com/IIkar/WealFlow/2025/middleware"
 	"github.com/IIkar/WealFlow/2025/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,20 +15,16 @@ import (
 // GetTransactions обрабатывает GET запросы для получения всех транзакций.
 func GetTransactions(c *fiber.Ctx) error {
 
-	userID, err := middleware.ExtractUserID(c)
+	userID, err := primitive.ObjectIDFromHex(c.Locals("userID").(string))
 	if userID == primitive.NilObjectID {
-		log.Printf("Ошибка токена: %v\n", err)
+		log.Printf("Ошибка токена: %v\n")
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "Действующий токен не найден"})
 	}
-	if err != nil {
-		// Эта ошибка не должна произойти, если middleware отработал корректно
-		log.Println("Критическая ошибка: UserID отсутствует в Locals после middleware")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Внутренняя ошибка сервера"})
-	}
+
 	var transactions []models.Transaction // Слайс для хранения найденных транзакций
 
 	// Выполняем поиск всех документов в коллекции
-	filter := bson.M{"user_id": userID} // <--- ФИЛЬТРАЦИЯ ПО USERID
+	filter := bson.M{"user_id": userID}
 	cursor, err := database.TransactionsCollection.Find(context.Background(), filter)
 	if err != nil {
 		log.Printf("Ошибка при поиске транзакций: %v\n", err)
@@ -66,15 +60,10 @@ func GetTransactions(c *fiber.Ctx) error {
 // PostTransaction обрабатывает POST запросы для создания новой транзакции.
 func PostTransaction(c *fiber.Ctx) error {
 
-	userID, err := middleware.ExtractUserID(c)
-	if userID == primitive.NilObjectID {
-		log.Printf("Ошибка токена: %v\n", err)
+	userID := c.Locals("userID").(string)
+	if userID == "" {
+		log.Printf("Ошибка токена: %v\n")
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "Действующий токен не найден"})
-	}
-	if err != nil {
-		// Эта ошибка не должна произойти, если middleware отработал корректно
-		log.Println("Критическая ошибка: UserID отсутствует в Locals после middleware")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Внутренняя ошибка сервера"})
 	}
 
 	transaction := new(models.Transaction) // Создаем указатель на новую структуру Transaction
@@ -93,7 +82,7 @@ func PostTransaction(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Поле 'category' обязательно"})
 	}
 
-	transaction.UserID = userID
+	transaction.UserID, _ = primitive.ObjectIDFromHex(userID)
 
 	// Если дата не передана клиентом, устанавливаем текущую дату и время
 	if transaction.Date == 0 { // primitive.DateTime это int64, 0 - его нулевое значение
@@ -115,16 +104,12 @@ func PostTransaction(c *fiber.Ctx) error {
 
 // UpdateTransaction обрабатывает PATCH запросы для обновления существующей транзакции.
 func UpdateTransaction(c *fiber.Ctx) error {
-	userID, err := middleware.ExtractUserID(c)
-	if userID == primitive.NilObjectID {
-		log.Printf("Ошибка токена: %v\n", err)
+	userStr := c.Locals("userID").(string)
+	if userStr == "" {
+		log.Printf("Ошибка токена: %v\n")
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "Действующий токен не найден"})
 	}
-	if err != nil {
-		// Эта ошибка не должна произойти, если middleware отработал корректно
-		log.Println("Критическая ошибка: UserID отсутствует в Locals после middleware")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Внутренняя ошибка сервера"})
-	}
+	userID, _ := primitive.ObjectIDFromHex(userStr)
 
 	id := c.Params("id") // Получаем ID из параметров пути
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -187,16 +172,12 @@ func UpdateTransaction(c *fiber.Ctx) error {
 
 // DeleteTransaction обрабатывает DELETE запросы для удаления транзакции.
 func DeleteTransaction(c *fiber.Ctx) error {
-	userID, err := middleware.ExtractUserID(c)
-	if userID == primitive.NilObjectID {
-		log.Printf("Ошибка токена: %v\n", err)
+	userStr := c.Locals("userID").(string)
+	if userStr == "" {
+		log.Printf("Ошибка токена: %v\n")
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"success": false, "message": "Действующий токен не найден"})
 	}
-	if err != nil {
-		// Эта ошибка не должна произойти, если middleware отработал корректно
-		log.Println("Критическая ошибка: UserID отсутствует в Locals после middleware")
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Внутренняя ошибка сервера"})
-	}
+	userID, _ := primitive.ObjectIDFromHex(userStr)
 
 	id := c.Params("id") // Получаем ID из параметров пути
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -221,17 +202,4 @@ func DeleteTransaction(c *fiber.Ctx) error {
 
 	// Возвращаем сообщение об успехе
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true, "message": "Транзакция успешно удалена"})
-}
-
-// DeleteAllTransactionsOnUser удаляет все транзакции по UserID (DevTool)
-func DeleteAllTransactionsOnUser(c *fiber.Ctx) error {
-	userId, err := middleware.ExtractUserID(c)
-	if userId == primitive.NilObjectID || err != nil {
-		log.Fatal("No token or invalid id ")
-	}
-
-	res, err := database.TransactionsCollection.DeleteMany(context.Background(), bson.M{"user_id": userId})
-	fmt.Printf("Удалено: %d транзакций", res.DeletedCount)
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true, "deletedCount": res.DeletedCount})
 }

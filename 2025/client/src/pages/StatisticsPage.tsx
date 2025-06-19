@@ -1,9 +1,9 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {motion, Variants} from 'framer-motion';
 import Button from '../components/common/Button';
 import StatCard from '../components/statistics/StatCard';
 import ChartContainer from '../components/statistics/ChartContainer';
-import type {ChartData, TimeFrame, Transaction} from '../types';
+import type {TimeFrame} from '../types';
 import {
     Wallet,
     TrendingUp,
@@ -14,13 +14,18 @@ import {
     PieChartIcon
 } from 'lucide-react';
 import {format, endOfMonth, endOfYear, differenceInDays, subDays, startOfMonth, startOfYear} from 'date-fns';
-import {useQuery, useQueryClient} from "@tanstack/react-query";
-import {useTransactionsManager} from "../components/transactions/functions";
+import {useGetTransactions} from "../components/transactions/functions";
+import {useQueryClient} from "@tanstack/react-query";
 
 const StatisticsPage: React.FC = () => {
+    const { data: transactions} = useGetTransactions();
+    const queryClient = useQueryClient()
+    useEffect(() => {
+        queryClient.invalidateQueries({queryKey: ["transactions"]}).then(r => {})
+    }, []);
+
     const [timeframe, setTimeframe] = useState<TimeFrame>('month');
     const [customRange, setCustomRange] = useState<{ start: Date | null, end: Date | null }>({start: null, end: null});
-    const queryClient = useQueryClient();
 
     const {startDate, endDate} = useMemo(() => {
         const now = new Date();
@@ -37,8 +42,6 @@ const StatisticsPage: React.FC = () => {
                 return {startDate: startOfMonth(now), endDate: endOfMonth(now)};
         }
     }, [timeframe, customRange]);
-
-    const {data: transactions} = useTransactionsManager();
 
     const filteredTransactions = transactions.filter(t => {
         const tDate = new Date(t.date);

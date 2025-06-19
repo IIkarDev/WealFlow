@@ -36,7 +36,7 @@ body {
 .input:-webkit-autofill:hover, 
 .input:-webkit-autofill:focus, 
 .input:-webkit-autofill:active  {
-    -webkit-box-shadow: 0 0 0 30px theme('colors.gray.700') inset !important; /* For dark mode */
+    -webkit-box-shadow: 0 0 0 30px theme('colors.gray.700') !important; /* For dark mode */
     -webkit-text-fill-color: theme('colors.gray.100') !important; /* For dark mode */
 }
 html:not(.dark) .input:-webkit-autofill,
