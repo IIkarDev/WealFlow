@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import {format, endOfMonth, endOfYear, differenceInDays, subDays, startOfMonth, startOfYear} from 'date-fns';
 import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {useTransactionsManager} from "../components/transactions/functions";
 
 const StatisticsPage: React.FC = () => {
     const [timeframe, setTimeframe] = useState<TimeFrame>('month');
@@ -37,23 +38,7 @@ const StatisticsPage: React.FC = () => {
         }
     }, [timeframe, customRange]);
 
-    const {data: transactions, isLoading: isLoadingTransactions} = useQuery<Transaction[], Error>({
-        queryKey: ["transactions"],
-        queryFn: async () => {
-            const response = await fetch(import.meta.env.VITE_API_URL+"/api/transactions", {
-                credentials: 'include'// Критично для сессий на основе cookie
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({message: 'Failed to fetch transactions and parse error response'}));
-                throw new Error(errorData.message || `Failed to fetch transactions. Status: ${response.status}`);
-            }
-            // Dates from backend are expected to be ISO strings parsable by new Date()
-            return response.json();
-        },
-        initialData: [],
-    });
-
-    queryClient.invalidateQueries({queryKey: ["transactions"]})
+    const {data: transactions} = useTransactionsManager();
 
     const filteredTransactions = transactions.filter(t => {
         const tDate = new Date(t.date);

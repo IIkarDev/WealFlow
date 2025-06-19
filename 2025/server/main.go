@@ -34,8 +34,8 @@ func main() {
 	app := fiber.New()
 
 	// Берём фронтенд домен из env, если нет — fallback на localhost для разработки
-	frontendOrigin := os.Getenv("FRONTEND_ORIGIN")
-	if frontendOrigin == "" {
+	frontendOrigin := "https://" + os.Getenv("FRONTEND_ORIGIN")
+	if frontendOrigin == "https://" {
 		frontendOrigin = "http://localhost:5173"
 	}
 
@@ -62,9 +62,9 @@ func main() {
 	apiRoutes.Delete("/transactions/:id", controllers.DeleteTransaction)
 	apiRoutes.Delete("/clear", controllers.DeleteAllTransactionsOnUser)
 
-	if os.Getenv("ENV") == "production" {
-		app.Static("/", "../client") // Путь к собранным файлам React
-	}
+	//if os.Getenv("ENV") == "production" {
+	//	app.Static("/", "../client") // Путь к собранным файлам React
+	//}
 
 	// Порт из env или 5000 по умолчанию
 	PORT := os.Getenv("PORT")

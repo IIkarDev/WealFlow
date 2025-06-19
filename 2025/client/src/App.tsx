@@ -1,4 +1,4 @@
-import {BrowserRouter as Router, Routes, Route, useNavigate, Navigate} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import React, {useState, useEffect} from 'react';
 import {AuthProvider} from './context/AuthContext';
 import {ThemeProvider} from './context/ThemeContext';

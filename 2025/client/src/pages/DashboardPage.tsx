@@ -7,29 +7,11 @@ import {TransactionTable} from '../components/transactions/TransactionTable';
 import type {ChartData, Transaction} from '../types';
 import {Link, useNavigate} from 'react-router-dom';
 import Button from '../components/common/Button';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useTransactionsManager} from "../components/transactions/functions";
 
 
 const DashboardPage: React.FC = () => {
-    const queryClient = useQueryClient();
-
-    const {data: transactions, isLoading: isLoadingTransactions} = useQuery<Transaction[], Error>({
-        queryKey: ["transactions"],
-        queryFn: async () => {
-            const response = await fetch(import.meta.env.VITE_API_URL+"/api/transactions", {
-                credentials: 'include'// Критично для сессий на основе cookie
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({message: 'Failed to fetch transactions and parse error response'}));
-                throw new Error(errorData.message || `Failed to fetch transactions. Status: ${response.status}`);
-            }
-            // Dates from backend are expected to be ISO strings parsable by new Date()
-            return response.json();
-        },
-        initialData: [],
-    });
-    queryClient.invalidateQueries({queryKey: ["transactions"]})
-
+    const {data:  transactions} = useTransactionsManager();
 
     const recentTransactions = transactions.slice(0, 5); // Show top 5 recent
 

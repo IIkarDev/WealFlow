@@ -5,11 +5,9 @@ import Button from '../components/common/Button';
 import {TransactionTable} from '../components/transactions/TransactionTable';
 import TransactionForm from '../components/transactions/TransactionForm';
 import type {Transaction, NewTransactionData} from '../types';
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useTransactionsManager} from "../components/transactions/functions";
 
 const TransactionsPage: React.FC = () => {
-    const queryClient = useQueryClient();
     const [showForm, setShowForm] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 

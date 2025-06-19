@@ -45,7 +45,7 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
 
             if (!idToken) return;
 
-            const res = await fetch("http://localhost:5000/auth/google", {
+            const res = await fetch("/auth/google", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -59,6 +59,7 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
             console.error("Error sending token to backend:", err);
         }
     };
+
     const LoginWithGoogle = () => {
 
         const {loginWithRedirect, getIdTokenClaims} = useAuth0();
