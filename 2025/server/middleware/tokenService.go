@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -50,6 +51,7 @@ func ValidateToken(tokenStr string, secret string) (string, error) {
 		return []byte(secret), nil
 	})
 	if err != nil || !token.Valid {
+		fmt.Println(err)
 		return "", errors.New("Пользователь не авторизован или недопустимый токен")
 	}
 	sub, ok := claims["sub"].(string)
