@@ -43,6 +43,7 @@ func OAuthCallback(c *fiber.Ctx) error {
 		fmt.Println("CreateToken error:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось создать токен"})
 	}
+	fmt.Println(accessToken)
 
 	middleware.SetAuthCookies(c, "access_token", accessToken)
 
