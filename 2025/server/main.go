@@ -51,7 +51,7 @@ func main() {
 	// Роуты аутентификации (без защиты)
 	authRoutes := app.Group("/api/auth")
 	authRoutes.Get("/", auth.GetUser)
-	authRoutes.Get("/google", auth.OAuthCallback)
+	authRoutes.Post("/google", auth.OAuthCallback)
 	authRoutes.Post("/register", auth.Register)
 	authRoutes.Post("/login", auth.Login)
 	authRoutes.Post("/logout", auth.Logout)
