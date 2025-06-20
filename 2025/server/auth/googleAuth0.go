@@ -117,6 +117,11 @@ func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
 		fmt.Println("findOrCreateUser: ошибка создания пользователя:", err)
 		return models.User{}, "Ошибка входа", fiber.NewError(fiber.StatusInternalServerError, "Ошибка создания пользователя")
 	}
+	err = database.UsersCollection.FindOne(context.Background(), filter).Decode(&user)
+	if err == nil {
+		fmt.Printf("findOrCreateUser: пользователь найден: %+v\n", user)
+		return user, "Пользователь " + user.Name + " успешно авторизован", nil
+	}
 	user.ID = res.InsertedID.(primitive.ObjectID)
 
 	fmt.Printf("findOrCreateUser: пользователь создан: %+v\n", user)
