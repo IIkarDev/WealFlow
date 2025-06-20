@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
             if (!idToken) return;
 
-            const res = await fetch("/api/auth/google", {
+            const res = await fetch(import.meta.env.VITE_API_URL+"/api/auth/google", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
