@@ -61,7 +61,7 @@ func SetAuthCookies(c *fiber.Ctx, key string, token string) {
 		Secure:   isSecure,
 		SameSite: sameSite,
 		Expires:  time.Now().Add(time.Minute * time.Duration(duration)),
-		MaxAge:   duration,
+		MaxAge:   duration * 60,
 		Domain:   os.Getenv("COOKIE_DOMAIN"),
 		Path:     "/",
 	})
