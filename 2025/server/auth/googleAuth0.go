@@ -25,7 +25,7 @@ func OAuthCallback(c *fiber.Ctx) error {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	user, err := findOrCreateUser(claims)
+	user, message, err := findOrCreateUser(claims)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -37,7 +37,7 @@ func OAuthCallback(c *fiber.Ctx) error {
 
 	middleware.SetAuthCookies(c, "access_token", accessToken)
 
-	return c.JSON(fiber.Map{"success": true, "user": user})
+	return c.JSON(fiber.Map{"success": true, "message": message})
 }
 
 func extractTokenFromBody(c *fiber.Ctx) (string, error) {
@@ -70,16 +70,16 @@ func verifyOAuthToken(tokenStr string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func findOrCreateUser(claims jwt.MapClaims) (models.User, error) {
+func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
 	email, ok := claims["email"].(string)
 	if !ok || email == "" {
-		return models.User{}, fiber.NewError(fiber.StatusBadRequest, "Email not found in token")
+		return models.User{}, "Ошибка входа", fiber.NewError(fiber.StatusBadRequest, "Email not found in token")
 	}
 
 	var user models.User
 	err := database.UsersCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
 	if err == nil {
-		return user, nil
+		return user, "Пользователь" + user.Name + " успешно авторизован", nil
 	}
 
 	user = models.User{
@@ -89,8 +89,8 @@ func findOrCreateUser(claims jwt.MapClaims) (models.User, error) {
 
 	res, err := database.UsersCollection.InsertOne(context.Background(), user)
 	if err != nil {
-		return models.User{}, fiber.NewError(fiber.StatusInternalServerError, "Ошибка создания пользователя")
+		return models.User{}, "Ошибка входа", fiber.NewError(fiber.StatusInternalServerError, "Ошибка создания пользователя")
 	}
 	user.ID = res.InsertedID.(primitive.ObjectID)
-	return user, nil
+	return user, "Пользователь " + user.Name + " успешно создан", nil
 }

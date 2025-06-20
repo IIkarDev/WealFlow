@@ -10,14 +10,11 @@ interface LoginFormProps {
     onToggleForm: () => void;
 }
 
-
-
-
 const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const {login, isLoading} = useAuth();
+    const {login, isLoading, fetchAndSendToken} = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,28 +34,6 @@ const LoginForm: React.FC<LoginFormProps> = ({onToggleForm}) => {
         exit: {opacity: 0, y: -20, transition: {duration: 0.3, ease: "easeIn" as const}}
     };
 
-    const fetchAndSendToken = async (getIdTokenClaims: () => Promise<any>) => {
-        try {
-            const claims = await getIdTokenClaims();
-            const idToken = claims?.__raw;
-
-
-            if (!idToken) return;
-
-            const res = await fetch("/api/auth/google", {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: idToken }),
-            });
-
-            if (!res.ok) {
-                console.error("Failed to authenticate with backend");
-            }
-        } catch (err) {
-            console.error("Error sending token to backend:", err);
-        }
-    };
 
     const LoginWithGoogle = () => {
 

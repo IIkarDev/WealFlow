@@ -5,6 +5,7 @@ interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    fetchAndSendToken: (getClaims: () => Promise<any>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -129,9 +130,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
             console.error("Ошибка выхода на сервере:", error);
         }
     };
+    const fetchAndSendToken = async (getIdTokenClaims: () => Promise<any>) => {
+        try {
+            const claims = await getIdTokenClaims();
+            const idToken = claims?.__raw;
+
+
+            if (!idToken) return;
+
+            const res = await fetch("/api/auth/google", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: idToken }),
+            });
+
+            if (!res.ok) {
+                console.error("Failed to authenticate with backend");
+            }
+
+            await validateUser();
+        } catch (err) {
+            console.error("Error sending token to backend:", err);
+        }
+    };
 
     return (
-        <AuthContext.Provider value={{...authState, login, register, logout}}>
+        <AuthContext.Provider value={{...authState, login, register, logout, fetchAndSendToken }}>
             {children}
         </AuthContext.Provider>
     );
