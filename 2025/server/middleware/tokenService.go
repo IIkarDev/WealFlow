@@ -22,6 +22,8 @@ func CreateToken(userID primitive.ObjectID, secret string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": userID.Hex(),
 		"exp": time.Now().Add(time.Minute * time.Duration(duration)).Unix(),
+		"nbf": time.Now().Add(time.Minute * time.Duration(duration)).Unix(),
+		"iat": time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
@@ -34,12 +36,22 @@ func SetAuthCookies(c *fiber.Ctx, key string, token string) {
 		isSecure = true
 		sameSite = "None"
 	}
+
+	var duration int
+	if key == "access_token" {
+		duration, _ = strconv.Atoi(os.Getenv("ACCESS_EXPIRE_MINUTES"))
+	} else {
+		duration, _ = strconv.Atoi(os.Getenv("REFRESH_EXPIRE_HOURS"))
+		duration *= 60
+	}
 	c.Cookie(&fiber.Cookie{
 		Name:     key,
 		Value:    token,
 		HTTPOnly: true,
 		Secure:   isSecure,
 		SameSite: sameSite,
+		Expires:  time.Now().Add(time.Minute * time.Duration(duration)),
+		MaxAge:   duration,
 		Domain:   os.Getenv("COOKIE_DOMAIN"),
 		Path:     "/",
 	})
