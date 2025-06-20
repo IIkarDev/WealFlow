@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/IIkar/WealFlow/2025/database"
 	"github.com/IIkar/WealFlow/2025/middleware"
 	"github.com/IIkar/WealFlow/2025/models"
@@ -19,21 +20,33 @@ func OAuthCallback(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	fmt.Println("Received OAuth token:", tokenStr)
 
 	claims, err := verifyOAuthToken(tokenStr)
 	if err != nil {
+		fmt.Println("verifyOAuthToken error:", err)
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
+	fmt.Println("Claims:", claims)
 
 	user, message, err := findOrCreateUser(claims)
 	if err != nil {
+		fmt.Println("findOrCreateUser error:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	fmt.Println("User found or created:", user)
+
+	if user.ID.IsZero() {
+		fmt.Println("User ID is zero! Cannot create token.")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "User ID is invalid"})
 	}
 
 	accessToken, err := middleware.CreateToken(user.ID, os.Getenv("ACCESS_SECRET"))
 	if err != nil {
+		fmt.Println("CreateToken error:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось создать токен"})
 	}
+	fmt.Println("Access Token created:", accessToken)
 
 	middleware.SetAuthCookies(c, "access_token", accessToken)
 
