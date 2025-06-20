@@ -93,8 +93,9 @@ func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
 	}
 
 	user = models.User{
-		Email: email,
-		Name:  claims["name"].(string),
+		Email:    email,
+		Name:     claims["name"].(string),
+		Provider: "google",
 	}
 
 	res, err := database.UsersCollection.InsertOne(context.Background(), user)
