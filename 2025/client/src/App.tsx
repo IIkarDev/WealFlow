@@ -13,34 +13,6 @@ import WelcomeOverlay from './components/dashboard/WelcomeOverlay';
 import {Auth0Provider} from "@auth0/auth0-react";
 import {useQueryClient} from "@tanstack/react-query";
 
-// type ErrorBoundaryProps = React.PropsWithChildren<{}>;
-
-// type ErrorBoundaryState = {
-//     hasError: boolean;
-//     error: Error | null;
-// };
-
-// class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-//     constructor(props: ErrorBoundaryProps) {
-//         super(props);
-//         this.state = { hasError: false, error: null };
-//     }
-//
-//     static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-//         return { hasError: true, error };
-//     }
-//
-//     componentDidCatch(error: Error, info: React.ErrorInfo) {
-//         console.error("ErrorBoundary caught:", error, info);
-//     }
-//
-//     render() {
-//         if (this.state.hasError) {
-//             return <div>Ошибка: {this.state.error?.message}</div>;
-//         }
-//         return this.props.children;
-//     }
-// }
 function App() {
     const [showWelcome, setShowWelcome] = useState(false);
 
@@ -60,6 +32,7 @@ function App() {
                                clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
                                authorizationParams={{
                                    redirect_uri: import.meta.env.VITE_AUTH0_REDIRECT_URI,
+                                   audience: import.meta.env.VITE_AUTH0_AUDIENCE,
                                    connection: 'google-oauth2'
                                }}>
                     <Router>
