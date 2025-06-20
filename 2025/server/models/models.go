@@ -7,6 +7,7 @@ type User struct {
 	Name     string             `json:"name"`
 	Email    string             `json:"email"`
 	Password []byte             `json:"password"`
+	Provider string             `bson:"provider"`
 }
 
 type Transaction struct {

@@ -90,7 +90,8 @@ func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
 	}
 
 	var user models.User
-	err := database.UsersCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
+	filter := bson.M{"email": email, "provider": "google"}
+	err := database.UsersCollection.FindOne(context.Background(), filter).Decode(&user)
 	if err == nil {
 		return user, "Пользователь" + user.Name + " успешно авторизован", nil
 	}

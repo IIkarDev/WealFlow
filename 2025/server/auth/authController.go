@@ -37,6 +37,7 @@ func Register(c *fiber.Ctx) error {
 		Name:     data["name"],
 		Email:    data["email"],
 		Password: password,
+		Provider: "common",
 	}
 
 	res, err := database.UsersCollection.InsertOne(context.Background(), user)
@@ -64,7 +65,8 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Неверный формат запроса"})
 	}
 
-	err := database.UsersCollection.FindOne(context.Background(), bson.M{"email": data["email"]}).Decode(&user)
+	filter := bson.M{"email": data["email"], "provider": "common"}
+	err := database.UsersCollection.FindOne(context.Background(), filter).Decode(&user)
 	if err != nil {
 		log.Printf("Пользователь не найден: %v\n", err)
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Пользователь не найден"})
