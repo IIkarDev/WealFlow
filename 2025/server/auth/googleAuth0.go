@@ -16,36 +16,43 @@ import (
 )
 
 func OAuthCallback(c *fiber.Ctx) error {
+	fmt.Println("OAuthCallback: старт обработки запроса")
+
 	tokenStr, err := extractTokenFromBody(c)
 	if err != nil {
+		fmt.Println("OAuthCallback: ошибка при извлечении токена из тела запроса:", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	fmt.Println("OAuthCallback: токен успешно извлечён")
 
 	claims, err := verifyOAuthToken(tokenStr)
 	if err != nil {
-		fmt.Println("verifyOAuthToken error:", err)
+		fmt.Println("OAuthCallback: ошибка валидации OAuth токена:", err)
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
+	fmt.Println("OAuthCallback: токен верифицирован, claims:", claims)
 
 	user, message, err := findOrCreateUser(claims)
 	if err != nil {
-		fmt.Println("findOrCreateUser error:", err)
+		fmt.Println("OAuthCallback: ошибка при поиске или создании пользователя:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
+	fmt.Printf("OAuthCallback: пользователь найден/создан: %+v\n", user)
 
 	if user.ID.IsZero() {
-		fmt.Println("User ID is zero! Cannot create token.")
+		fmt.Println("OAuthCallback: получен пустой ID пользователя")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "User ID is invalid"})
 	}
 
 	accessToken, err := middleware.CreateToken(user.ID, os.Getenv("ACCESS_SECRET"))
 	if err != nil {
-		fmt.Println("CreateToken error:", err)
+		fmt.Println("OAuthCallback: ошибка генерации access токена:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось создать токен"})
 	}
-	fmt.Println(accessToken)
+	fmt.Println("OAuthCallback: access токен успешно создан")
 
 	middleware.SetAuthCookies(c, "access_token", accessToken)
+	fmt.Println("OAuthCallback: access токен установлен в куки")
 
 	return c.JSON(fiber.Map{"success": true, "message": message})
 }
@@ -55,34 +62,44 @@ func extractTokenFromBody(c *fiber.Ctx) (string, error) {
 		Token string `json:"token"`
 	}
 	if err := c.BodyParser(&body); err != nil || body.Token == "" {
+		fmt.Println("extractTokenFromBody: ошибка парсинга тела запроса или пустой токен")
 		return "", fiber.NewError(fiber.StatusBadRequest, "Token is required")
 	}
+	fmt.Println("extractTokenFromBody: токен получен из тела запроса")
 	return body.Token, nil
 }
 
 func verifyOAuthToken(tokenStr string) (jwt.MapClaims, error) {
+	fmt.Println("verifyOAuthToken: начало верификации токена")
 	jwksURL := "https://" + os.Getenv("AUTH0_DOMAIN") + "/.well-known/jwks.json"
 	jwks, err := keyfunc.Get(jwksURL, keyfunc.Options{})
 	if err != nil {
+		fmt.Println("verifyOAuthToken: ошибка загрузки JWKS:", err)
 		return nil, fiber.NewError(http.StatusInternalServerError, "Failed to load JWKS")
 	}
 
 	token, err := jwt.Parse(tokenStr, jwks.Keyfunc)
 	if err != nil || !token.Valid {
+		fmt.Println("verifyOAuthToken: токен невалидный:", err)
 		return nil, fiber.NewError(http.StatusUnauthorized, "Invalid token")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
+		fmt.Println("verifyOAuthToken: claims не удалось привести к MapClaims")
 		return nil, fiber.NewError(http.StatusInternalServerError, "Invalid claims")
 	}
+	fmt.Println("verifyOAuthToken: токен успешно верифицирован")
 
 	return claims, nil
 }
 
 func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
+	fmt.Println("findOrCreateUser: начало поиска или создания пользователя")
+
 	email, ok := claims["email"].(string)
 	if !ok || email == "" {
+		fmt.Println("findOrCreateUser: email отсутствует в claims")
 		return models.User{}, "Ошибка входа", fiber.NewError(fiber.StatusBadRequest, "Email not found in token")
 	}
 
@@ -90,8 +107,10 @@ func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
 	filter := bson.M{"email": email, "provider": "google"}
 	err := database.UsersCollection.FindOne(context.Background(), filter).Decode(&user)
 	if err == nil {
-		return user, "Пользователь" + user.Name + " успешно авторизован", nil
+		fmt.Printf("findOrCreateUser: пользователь найден: %+v\n", user)
+		return user, "Пользователь " + user.Name + " успешно авторизован", nil
 	}
+	fmt.Println("findOrCreateUser: пользователь не найден, создаю нового")
 
 	user = models.User{
 		Email:    email,
@@ -101,8 +120,11 @@ func findOrCreateUser(claims jwt.MapClaims) (models.User, string, error) {
 
 	res, err := database.UsersCollection.InsertOne(context.Background(), user)
 	if err != nil {
+		fmt.Println("findOrCreateUser: ошибка создания пользователя:", err)
 		return models.User{}, "Ошибка входа", fiber.NewError(fiber.StatusInternalServerError, "Ошибка создания пользователя")
 	}
 	user.ID = res.InsertedID.(primitive.ObjectID)
+
+	fmt.Printf("findOrCreateUser: пользователь создан: %+v\n", user)
 	return user, "Пользователь " + user.Name + " успешно создан", nil
 }
