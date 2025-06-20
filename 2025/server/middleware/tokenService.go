@@ -22,7 +22,6 @@ func CreateToken(userID primitive.ObjectID, secret string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": userID.Hex(),
 		"exp": time.Now().Add(time.Minute * time.Duration(duration)).Unix(),
-		"nbf": time.Now().Add(time.Minute * time.Duration(duration)).Unix(),
 		"iat": time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
