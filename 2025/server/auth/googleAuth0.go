@@ -16,28 +16,24 @@ import (
 )
 
 func OAuthCallback(c *fiber.Ctx) error {
-	fmt.Println("OAuthCallback: старт обработки запроса")
 
 	tokenStr, err := extractTokenFromBody(c)
 	if err != nil {
 		fmt.Println("OAuthCallback: ошибка при извлечении токена из тела запроса:", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println("OAuthCallback: токен успешно извлечён")
 
 	claims, err := verifyOAuthToken(tokenStr)
 	if err != nil {
 		fmt.Println("OAuthCallback: ошибка валидации OAuth токена:", err)
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println("OAuthCallback: токен верифицирован, claims:", claims)
 
 	user, message, err := findOrCreateUser(claims)
 	if err != nil {
 		fmt.Println("OAuthCallback: ошибка при поиске или создании пользователя:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Printf("OAuthCallback: пользователь найден/создан: %+v\n", user)
 
 	if user.ID.IsZero() {
 		fmt.Println("OAuthCallback: получен пустой ID пользователя")
@@ -49,10 +45,8 @@ func OAuthCallback(c *fiber.Ctx) error {
 		fmt.Println("OAuthCallback: ошибка генерации access токена:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось создать токен"})
 	}
-	fmt.Println("OAuthCallback: access токен успешно создан")
 
 	middleware.SetAuthCookies(c, "access_token", accessToken)
-	fmt.Println("OAuthCallback: access токен установлен в куки")
 
 	return c.JSON(fiber.Map{"success": true, "message": message})
 }
