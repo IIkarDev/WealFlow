@@ -123,10 +123,10 @@ const SettingsPage: React.FC = () => {
                             <Input label="Full Name" type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
                             <Input label="Email Address" type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                             <div className="flex justify-end pt-2">
-                                <Button variant="primary" type="submit">Save Changes</Button>
+                                {user?.provider == "common" && <Button variant="primary" type="submit">Save Changes</Button>}
                             </div>
                         </form>
-                        {user?.provider == "google" && <Button variant="primary" type="submit" onClick={logout}>Logout</Button>}
+                        {user?.provider != "common" && <Button variant="primary" type="submit" onClick={logout}>Logout</Button>}
                     </Card>
                 );
             case 'password':
