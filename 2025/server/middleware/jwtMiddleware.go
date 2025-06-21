@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+// Middleware-хендлер автосейвинга айди
 func JWTMiddleware(c *fiber.Ctx) error {
 	tokenStr := c.Cookies("access_token")
 
@@ -20,6 +21,14 @@ func JWTMiddleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// Refresh godoc
+// @Summary Обновление access токена
+// @Tags auth
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {object} map[string]bool
+// @Failure 401 {object} map[string]string
+// @Router /api/auth/refresh [post]
 func Refresh(c *fiber.Ctx) error {
 	tokenStr := c.Cookies("refresh_token")
 	if tokenStr == "" {

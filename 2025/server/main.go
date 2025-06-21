@@ -15,6 +15,19 @@ import (
 	"os"
 )
 
+// @title WealFlow API
+// @version 1.0
+// @description REST API для финансового приложения WealFlow.
+// @termsOfService http://swagger.io/terms/
+// @contact.name Карачебан Дмитрий
+// @contact.email your-email@example.com
+// @license.name MIT
+// @host localhost:5000
+// @BasePath /api
+// @schemes http
+// @securityDefinitions.apikey ApiKeyAuth
+// @in cookie
+// @name access_token
 func main() {
 	fmt.Println("Приложение запущено.")
 
@@ -55,6 +68,8 @@ func main() {
 	authRoutes.Post("/register", auth.Register)
 	authRoutes.Post("/login", auth.Login)
 	authRoutes.Post("/logout", auth.Logout)
+	authRoutes.Patch("/update", auth.PatchUser)
+	authRoutes.Patch("/password", auth.ChangePassword)
 	authRoutes.Post("/refresh", middleware.Refresh)
 
 	// Защищённые API маршруты
@@ -63,9 +78,6 @@ func main() {
 	apiRoutes.Post("/transactions", transactions.PostTransaction)
 	apiRoutes.Patch("/transactions/:id", transactions.UpdateTransaction)
 	apiRoutes.Delete("/transactions/:id", transactions.DeleteTransaction)
-
-	app.Get("/dev/access", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"token": c.Cookies("access_token")}) })
-	app.Get("/dev/refresh", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"token": c.Cookies("refresh_token")}) })
 
 	//if os.Getenv("ENV") == "production" {
 	//	app.Static("/", "../client") // Путь к собранным файлам React

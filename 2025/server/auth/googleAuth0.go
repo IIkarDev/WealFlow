@@ -15,6 +15,15 @@ import (
 	"os"
 )
 
+// OAuthCallback godoc
+// @Summary Вход через Google OAuth
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param token body map[string]string true "OAuth token от Auth0"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /api/auth/google [post]
 func OAuthCallback(c *fiber.Ctx) error {
 
 	tokenStr, err := extractTokenFromBody(c)

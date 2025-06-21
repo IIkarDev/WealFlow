@@ -12,7 +12,15 @@ import (
 	"time"
 )
 
-// GetTransactions обрабатывает GET запросы для получения всех транзакций.
+// GetTransactions godoc
+// @Summary Получить список транзакций
+// @Tags transactions
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {array} models.Transaction
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/transactions [get]
 func GetTransactions(c *fiber.Ctx) error {
 
 	userID, err := primitive.ObjectIDFromHex(c.Locals("userID").(string))
@@ -57,7 +65,18 @@ func GetTransactions(c *fiber.Ctx) error {
 	return c.JSON(transactions)
 }
 
-// PostTransaction обрабатывает POST запросы для создания новой транзакции.
+// PostTransaction godoc
+// @Summary Создать новую транзакцию
+// @Tags transactions
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param transaction body models.Transaction true "Данные транзакции"
+// @Success 201 {object} models.Transaction
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/transactions [post]
 func PostTransaction(c *fiber.Ctx) error {
 
 	userID := c.Locals("userID").(string)
@@ -102,7 +121,18 @@ func PostTransaction(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(transaction)
 }
 
-// UpdateTransaction обрабатывает PATCH запросы для обновления существующей транзакции.
+// UpdateTransaction godoc
+// @Summary Обновить транзакцию
+// @Tags transactions
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "ID транзакции"
+// @Param update body map[string]interface{} true "Обновляемые поля"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/transactions/{id} [patch]
 func UpdateTransaction(c *fiber.Ctx) error {
 	userStr := c.Locals("userID").(string)
 	if userStr == "" {
@@ -170,7 +200,18 @@ func UpdateTransaction(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true, "message": "Транзакция успешно обновлена"})
 }
 
-// DeleteTransaction обрабатывает DELETE запросы для удаления транзакции.
+// DeleteTransaction godoc
+// @Summary Удалить транзакцию
+// @Tags transactions
+// @Security ApiKeyAuth
+// @Produce json
+// @Param id path string true "ID транзакции"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/transactions/{id} [delete]
 func DeleteTransaction(c *fiber.Ctx) error {
 	userStr := c.Locals("userID").(string)
 	if userStr == "" {

@@ -14,6 +14,16 @@ import (
 	"time"
 )
 
+// Register godoc
+// @Summary Регистрация пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body map[string]string true "Поля: name, email, password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/register [post]
 func Register(c *fiber.Ctx) error {
 	var data map[string]string
 
@@ -57,6 +67,16 @@ func Register(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"success": true, "message": "пользователь " + user.Name + " зарегистрирован"})
 }
 
+// Login godoc
+// @Summary Авторизация пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body map[string]string true "Поля: email, password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/auth/login [post]
 func Login(c *fiber.Ctx) error {
 	var data map[string]string
 	var user models.User
@@ -86,6 +106,14 @@ func Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"success": true, "message": "пользователь " + user.Name + " авторизован"})
 }
 
+// GetUser godoc
+// @Summary Получение данных текущего пользователя
+// @Tags auth
+// @Produce json
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/auth [get]
 func GetUser(c *fiber.Ctx) error {
 	var user models.User
 
@@ -105,6 +133,12 @@ func GetUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+// Logout godoc
+// @Summary Выход пользователя (удаление куки)
+// @Tags auth
+// @Produce json
+// @Success 200 {object} map[string]bool
+// @Router /api/auth/logout [post]
 func Logout(c *fiber.Ctx) error {
 	isSecure := false
 	if os.Getenv("ENV") == "production" {
@@ -131,4 +165,82 @@ func Logout(c *fiber.Ctx) error {
 		Secure:   isSecure,
 	})
 	return c.JSON(fiber.Map{"success": true})
+}
+
+// PatchUser godoc
+// @Summary Обновление email или имени
+// @Tags auth
+// @Produce json
+// @Success 200 {object} map[string]bool
+// @Router /api/auth/update [post]
+func PatchUser(c *fiber.Ctx) error {
+	var data map[string]string
+
+	err := c.BodyParser(&data)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	tokenStr := c.Cookies("access_token")
+	userStr, err := middleware.ValidateToken(tokenStr, os.Getenv("ACCESS_SECRET"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(userStr)
+
+	delete(data, "_id")
+	delete(data, "password")
+
+	filter := bson.M{"_id": userID}
+	update := bson.M{"$set": data}
+
+	_, err = database.UsersCollection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"success": true, "message": "Пользователь успешно обновлен"})
+}
+
+// ChangePassword godoc
+// @Summary Обновление email или имени
+// @Tags auth
+// @Produce json
+// @Success 200 {object} map[string]bool
+// @Router /api/auth/password [post]
+func ChangePassword(c *fiber.Ctx) error {
+	var data map[string]string
+	var user models.User
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	tokenStr := c.Cookies("access_token")
+	userStr, err := middleware.ValidateToken(tokenStr, os.Getenv("ACCESS_SECRET"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(userStr)
+	filter := bson.M{"_id": userID}
+	err = database.UsersCollection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
+		log.Printf("пароли не совпадают: %v\n", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "пароли не совпадают"})
+	}
+
+	password, _ := bcrypt.GenerateFromPassword([]byte(data["newPassword"]), bcrypt.DefaultCost)
+	update := bson.M{"$set": bson.M{"password": password}}
+
+	_, err = database.UsersCollection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(fiber.Map{"success": true, "message": "Пароль успешно обновлен"})
 }
