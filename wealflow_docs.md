@@ -593,7 +593,7 @@ CMD ["./wealflow"]
 ## Контакты и поддержка
 
 **Разработчик**: Карачебан Дмитрий
-**Email**: your-email@example.com
+**Email**: iikardev@gmail.com
 **Лицензия**: MIT
 
 ---
