@@ -6,6 +6,8 @@ interface AuthContextType extends AuthState {
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     fetchAndSendToken: (getClaims: () => Promise<any>) => Promise<void>;
+    update: (name: string, emil: string) => void;
+    changePassword: (password: string, newPassword: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
             if (response.ok) {
                 const currentUser: User = await response.json();
+                console.log('currentUser.provider', currentUser.provider);
                 localStorage.setItem('user', JSON.stringify(currentUser));
                 setAuthState({user: currentUser, isAuthenticated: true, isLoading: false});
             } else {
@@ -117,6 +120,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
         }
     };
 
+    const update = async (name: string, email: string) => {
+        try {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/api/auth/update", {
+                method: "PATCH",
+                headers: {"Content-Type": "application/json"},
+                credentials: 'include',
+                body: JSON.stringify({name, email}),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Ошибка обновления данных: ${response.statusText}`);
+            }
+            // После успешной регистрации, получаем данные пользователя (если происходит авто-логин)
+            await validateUser();
+        } catch (error: any) {
+            throw error;
+        }
+    };
+    const changePassword = async (password: string, newPassword: string) => {
+        try {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/api/auth/password", {
+                method: "PATCH",
+                headers: {"Content-Type": "application/json"},
+                credentials: 'include',
+                body: JSON.stringify({password, newPassword}),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Ошибка обновления данных: ${response.statusText}`);
+            }
+            // После успешной регистрации, получаем данные пользователя (если происходит авто-логин)
+            await validateUser();
+        } catch (error: any) {
+            throw error;
+        }
+    };
+
     const logout = async () => {
         localStorage.removeItem('user');
         setAuthState({user: null, isAuthenticated: false, isLoading: false});
@@ -130,6 +172,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
             console.error("Ошибка выхода на сервере:", error);
         }
     };
+
     const fetchAndSendToken = async (getIdTokenClaims: () => Promise<any>) => {
         try {
             const claims = await getIdTokenClaims();
@@ -156,7 +199,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     };
 
     return (
-        <AuthContext.Provider value={{...authState, login, register, logout, fetchAndSendToken }}>
+        <AuthContext.Provider value={{...authState, login, register, logout, fetchAndSendToken, update, changePassword }}>
             {children}
         </AuthContext.Provider>
     );
